@@ -1,0 +1,144 @@
+<%- include('header') %>
+
+<main class="container mx-auto px-4 py-8 mb-20">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold text-green-800 mb-3">Today's Fresh Menu 🥗</h1>
+        <p class="text-green-600 text-lg">Delicious food made fresh for you.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <% if (items && items.length > 0) { %>
+            <% items.forEach(item => { %>
+                
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-green-100 flex flex-col h-full transition duration-300 <%= item.inStock === false ? 'opacity-75 grayscale-[40%]' : 'hover:shadow-2xl transform hover:-translate-y-1' %>">
+                    
+                    <div class="h-48 overflow-hidden relative group">
+                        <img src="<%= item.image %>" alt="<%= item.name %>" class="w-full h-full object-cover <%= item.inStock !== false ? 'group-hover:scale-105' : '' %> transition duration-500">
+                        
+                        <% if (item.inStock === false) { %>
+                            <div class="absolute inset-0 bg-white/40 backdrop-blur-[2px] flex items-center justify-center z-10">
+                                <span class="bg-red-600 text-white font-black px-4 py-2 rounded-lg transform -rotate-12 shadow-2xl tracking-widest text-lg border-2 border-white">
+                                    OUT OF STOCK
+                                </span>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="p-6 flex flex-col flex-grow relative">
+                        <div class="flex justify-between items-baseline mb-2">
+                            <h3 class="text-xl font-bold text-gray-800"><%= item.name %></h3>
+                            <span class="text-lg font-bold text-green-600 bg-green-100 px-3 py-1 rounded-full">₹<%= item.price %></span>
+                        </div>
+                        
+                        <p class="text-gray-600 mb-6 text-sm flex-grow leading-relaxed"><%= item.description %></p>
+                        
+                        <% if (item.inStock !== false) { %>
+                            <div id="action-container-<%= item._id %>" class="w-full">
+                                <button onclick="updateCartItem('<%= item._id %>', '<%= item.name %>', <%= item.price %>, 1)" 
+                                    class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition duration-300 shadow-md active:scale-95 flex justify-center items-center gap-2 group">
+                                    <span class="group-hover:scale-110 transition-transform">🛒</span>
+                                    <span>Add to Cart</span> 
+                                </button>
+                            </div>
+                        <% } else { %>
+                            <div class="w-full mt-auto">
+                                <button disabled class="w-full bg-gray-200 text-gray-500 font-bold py-3 rounded-lg cursor-not-allowed flex justify-center items-center gap-2 border border-gray-300">
+                                    <span>🚫 Unavailable</span> 
+                                </button>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="col-span-3 text-center py-16 bg-white rounded-lg border-2 border-dashed border-gray-300">
+                <p class="text-gray-400 text-xl font-bold">The menu is empty right now. 🍽️</p>
+            </div>
+        <% } %>
+    </div>
+</main>
+
+<script>
+    // MASTER FUNCTION TO HANDLE ADD/REMOVE
+    function updateCartItem(id, name, price, change) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let existingItem = cart.find(item => item.id === id);
+
+        if (existingItem) {
+            existingItem.quantity += change;
+            // Remove if quantity drops to 0
+            if (existingItem.quantity <= 0) {
+                cart = cart.filter(item => item.id !== id);
+            }
+        } else if (change > 0) {
+            // Add new item
+            cart.push({ id, name, price, quantity: 1 });
+        }
+
+        // Save back to storage
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Update Header Badge
+        if (typeof updateHeaderCart === 'function') {
+            updateHeaderCart();
+        } 
+        
+        // Update the button on the UI
+        renderButton(id, name, price);
+    }
+
+    // RENDER BUTTON UI (Switches between "Add" and "- 1 +")
+    function renderButton(id, name, price) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const item = cart.find(i => i.id === id);
+        const container = document.getElementById(`action-container-${id}`);
+
+        if (!container) return;
+
+        if (item) {
+            // SHOW QUANTITY CONTROLS
+            container.innerHTML = `
+                <div class="flex items-center justify-between bg-green-50 border-2 border-green-500 rounded-lg overflow-hidden shadow-sm">
+                    <button onclick="updateCartItem('${id}', '${name}', ${price}, -1)" 
+                        class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-bold transition w-1/3 text-lg">-</button>
+                    
+                    <span class="font-bold text-green-900 w-1/3 text-center text-lg">${item.quantity}</span>
+                    
+                    <button onclick="updateCartItem('${id}', '${name}', ${price}, 1)" 
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold transition w-1/3 text-lg">+</button>
+                </div>
+            `;
+        } else {
+            // SHOW ADD TO CART BUTTON
+            container.innerHTML = `
+                <button onclick="updateCartItem('${id}', '${name}', ${price}, 1)" 
+                    class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition duration-300 shadow-md active:scale-95 flex justify-center items-center gap-2 group">
+                    <span class="group-hover:scale-110 transition-transform">🛒</span>
+                    <span>Add to Cart</span> 
+                </button>
+            `;
+        }
+    }
+
+    // INITIALIZE UI ON PAGE LOAD
+    document.addEventListener('DOMContentLoaded', () => {
+        const containers = document.querySelectorAll('[id^="action-container-"]');
+        containers.forEach(div => {
+            const id = div.id.replace('action-container-', '');
+            const btn = div.querySelector('button');
+            
+            if (btn) {
+                const onclickText = btn.getAttribute('onclick');
+                if(onclickText) {
+                    const args = onclickText.match(/'([^']+)',\s*'([^']+)',\s*([\d.]+)/);
+                    if (args) {
+                        const [_, itemId, itemName, itemPrice] = args;
+                        renderButton(itemId, itemName, itemPrice);
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+<%- include('footer') %>

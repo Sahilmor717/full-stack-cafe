@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Stack Cafe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>html { scroll-behavior: smooth; }</style>
+</head>
+<body class="bg-green-50 flex flex-col min-h-screen font-sans">
+
+<nav class="bg-green-800 text-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20 items-center">
+            
+            <a href="/" class="flex items-center gap-2 group">
+                <span class="text-3xl group-hover:rotate-12 transition-transform duration-300">☕</span>
+                <div class="flex flex-col">
+                    <span class="font-bold text-xl tracking-tight leading-none">Full Stack</span>
+                    <span class="text-xs text-green-300 uppercase tracking-widest font-semibold">Cafe</span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <% if (typeof user === 'undefined' || !user || user.role !== 'admin') { %>
+                    <a href="/dashboard" class="text-green-100 hover:text-white font-medium transition text-lg">Menu</a>
+                <% } %>
+                
+                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
+                    <a href="/admin" class="text-yellow-300 hover:text-white font-bold transition text-lg border-b-2 border-yellow-300">Admin Dashboard</a>
+                <% } %>
+                
+                <% if (typeof user !== 'undefined' && user && user.role !== 'admin') { %>
+                    <a href="/my-orders" class="text-green-100 hover:text-white font-medium transition text-lg">My Orders</a>
+                <% } %>
+                
+                <a href="/about" class="text-green-100 hover:text-white font-medium transition text-lg">About</a>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                
+                <% if (typeof user === 'undefined' || !user || user.role !== 'admin') { %>
+                    <a href="/checkout" class="relative group p-2">
+                        <span class="text-3xl group-hover:scale-110 transition-transform block">🛒</span>
+                        <span id="header-cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-green-800 hidden">0</span>
+                    </a>
+                <% } %>
+
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <div class="flex items-center gap-4 pl-6 border-l border-green-700">
+                        <div class="text-right hidden md:block">
+                            <span class="block text-xs text-green-300">Welcome,</span>
+                            <span class="block text-sm font-bold leading-none"><%= user.name %></span>
+                        </div>
+                        <a href="/logout" class="bg-green-900 hover:bg-red-600 px-4 py-2 rounded-lg transition text-xs font-bold text-green-100 hover:text-white shadow-sm">
+                            Logout
+                        </a>
+                    </div>
+                <% } else { %>
+                    <div class="flex items-center gap-3 pl-6 border-l border-green-700">
+                        <a href="/login" class="text-sm font-bold hover:text-green-200">Login</a>
+                        <a href="/signup" class="bg-white text-green-800 px-4 py-2 rounded-full text-sm font-bold hover:bg-green-100 transition shadow-sm">Sign Up</a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function updateHeaderCart() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const count = cart.reduce((acc, item) => acc + item.quantity, 0);
+        const badge = document.getElementById('header-cart-count');
+        
+        if (badge) {
+            badge.innerText = count;
+            if (count > 0) {
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', updateHeaderCart);
+</script>

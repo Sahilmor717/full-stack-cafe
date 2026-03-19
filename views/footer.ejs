@@ -1,0 +1,72 @@
+<footer class="bg-green-900 text-green-100 py-8 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <p class="font-semibold">&copy; 2026 Full Stack Cafe. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    socket.on('newOrderPlaced', (data) => {
+        if (window.location.pathname === '/admin') {
+            window.location.reload();
+        }
+    });
+
+    socket.on('orderStatusUpdated', (data) => {
+        if (window.location.pathname === '/my-orders') {
+            window.location.reload();
+        }
+    });
+</script>
+
+<script>
+    // Grab the public key safely from the server's .env file
+    const publicVapidKey = '<%= process.env.VAPID_PUBLIC_KEY %>';
+
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    async function subscribeToPush() {
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            try {
+                const register = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+                
+                const subscription = await register.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+                });
+
+                await fetch('/subscribe', {
+                    method: 'POST',
+                    body: JSON.stringify(subscription),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+            } catch (err) {
+                console.error("Push notification error:", err);
+            }
+        }
+    }
+
+    <% if (typeof user !== 'undefined' && user) { %>
+        if (Notification.permission === 'default') {
+            Notification.requestPermission().then(perm => {
+                if (perm === 'granted') subscribeToPush();
+            });
+        } else if (Notification.permission === 'granted') {
+            subscribeToPush();
+        }
+    <% } %>
+</script>
+</body>
+</html>
