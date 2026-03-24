@@ -5,85 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Full Stack Cafe</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>html { scroll-behavior: smooth; }</style>
 </head>
-<body class="bg-green-50 flex flex-col min-h-screen font-sans">
+<body class="bg-gray-50 flex flex-col min-h-screen">
 
-<nav class="bg-green-800 text-white shadow-lg sticky top-0 z-50">
+<nav class="bg-green-800 shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20 items-center">
-            
-            <a href="/" class="flex items-center gap-2 group">
-                <span class="text-3xl group-hover:rotate-12 transition-transform duration-300">☕</span>
-                <div class="flex flex-col">
-                    <span class="font-bold text-xl tracking-tight leading-none">Full Stack</span>
-                    <span class="text-xs text-green-300 uppercase tracking-widest font-semibold">Cafe</span>
-                </div>
-            </a>
-
-            <div class="hidden md:flex items-center space-x-8">
-                <% if (typeof user === 'undefined' || !user || user.role !== 'admin') { %>
-                    <a href="/dashboard" class="text-green-100 hover:text-white font-medium transition text-lg">Menu</a>
-                <% } %>
-                
-                <% if (typeof user !== 'undefined' && user && user.role === 'admin') { %>
-                    <a href="/admin" class="text-yellow-300 hover:text-white font-bold transition text-lg border-b-2 border-yellow-300">Admin Dashboard</a>
-                <% } %>
-                
-                <% if (typeof user !== 'undefined' && user && user.role !== 'admin') { %>
-                    <a href="/my-orders" class="text-green-100 hover:text-white font-medium transition text-lg">My Orders</a>
-                <% } %>
-                
-                <a href="/about" class="text-green-100 hover:text-white font-medium transition text-lg">About</a>
+        <div class="flex justify-between h-16">
+            <div class="flex items-center">
+                <a href="/dashboard" class="flex items-center gap-2 group">
+                    <span class="text-2xl group-hover:scale-110 transition-transform">🍔</span>
+                    <span class="font-bold text-white text-xl tracking-wide">Full Stack Cafe</span>
+                </a>
             </div>
 
-            <div class="flex items-center space-x-6">
-                
-                <% if (typeof user === 'undefined' || !user || user.role !== 'admin') { %>
-                    <a href="/checkout" class="relative group p-2">
-                        <span class="text-3xl group-hover:scale-110 transition-transform block">🛒</span>
-                        <span id="header-cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-green-800 hidden">0</span>
+            <div class="hidden md:flex items-center space-x-4">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <% if (user.role === 'admin') { %>
+                        <a href="/admin" class="text-green-100 hover:text-white px-3 py-2 rounded-md font-medium transition">Live Orders</a>
+                        <a href="/admin/menu" class="text-green-100 hover:text-white px-3 py-2 rounded-md font-medium transition">Edit Menu</a>
+                    <% } else { %>
+                        <a href="/dashboard" class="text-green-100 hover:text-white px-3 py-2 rounded-md font-medium transition">Menu</a>
+                        <a href="/my-orders" class="text-green-100 hover:text-white px-3 py-2 rounded-md font-medium transition">My Orders</a>
+                        
+                        <a href="/checkout" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-full font-bold shadow-md transition flex items-center gap-2">
+                            🛒 <span id="cart-count">0</span>
+                        </a>
+                    <% } %>
+                    <a href="/logout" class="text-red-300 hover:text-red-100 px-3 py-2 rounded-md font-medium transition ml-4">Logout</a>
+                <% } else { %>
+                    <a href="/login" class="text-green-100 hover:text-white px-3 py-2 rounded-md font-medium transition">Login</a>
+                <% } %>
+            </div>
+
+            <div class="md:hidden flex items-center">
+                <% if (typeof user !== 'undefined' && user && user.role !== 'admin') { %>
+                    <a href="/checkout" class="mr-4 text-white flex items-center gap-1 bg-green-600 px-3 py-1.5 rounded-full shadow-md">
+                        🛒 <span id="mobile-cart-count" class="font-bold">0</span>
                     </a>
                 <% } %>
-
-                <% if (typeof user !== 'undefined' && user) { %>
-                    <div class="flex items-center gap-4 pl-6 border-l border-green-700">
-                        <div class="text-right hidden md:block">
-                            <span class="block text-xs text-green-300">Welcome,</span>
-                            <span class="block text-sm font-bold leading-none"><%= user.name %></span>
-                        </div>
-                        <a href="/logout" class="bg-green-900 hover:bg-red-600 px-4 py-2 rounded-lg transition text-xs font-bold text-green-100 hover:text-white shadow-sm">
-                            Logout
-                        </a>
-                    </div>
-                <% } else { %>
-                    <div class="flex items-center gap-3 pl-6 border-l border-green-700">
-                        <a href="/login" class="text-sm font-bold hover:text-green-200">Login</a>
-                        <a href="/signup" class="bg-white text-green-800 px-4 py-2 rounded-full text-sm font-bold hover:bg-green-100 transition shadow-sm">Sign Up</a>
-                    </div>
-                <% } %>
+                
+                <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="text-green-100 hover:text-white focus:outline-none p-2">
+                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
             </div>
+        </div>
+    </div>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-green-900 border-t border-green-700 shadow-xl absolute w-full left-0">
+        <div class="px-4 py-3 space-y-2">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin" class="block text-green-100 hover:text-white hover:bg-green-700 px-3 py-3 rounded-md font-medium text-lg border-b border-green-800">Live Orders</a>
+                    <a href="/admin/menu" class="block text-green-100 hover:text-white hover:bg-green-700 px-3 py-3 rounded-md font-medium text-lg border-b border-green-800">Edit Menu</a>
+                <% } else { %>
+                    <a href="/dashboard" class="block text-green-100 hover:text-white hover:bg-green-700 px-3 py-3 rounded-md font-medium text-lg border-b border-green-800">Browse Menu</a>
+                    <a href="/my-orders" class="block text-green-100 hover:text-white hover:bg-green-700 px-3 py-3 rounded-md font-medium text-lg border-b border-green-800">My Orders</a>
+                <% } %>
+                <a href="/logout" class="block text-red-300 hover:text-red-100 hover:bg-green-700 px-3 py-3 rounded-md font-medium text-lg">Logout</a>
+            <% } else { %>
+                <a href="/login" class="block text-green-100 hover:text-white hover:bg-green-700 px-3 py-3 rounded-md font-medium text-lg">Login</a>
+            <% } %>
         </div>
     </div>
 </nav>
 
 <script>
+    // This script automatically counts items in LocalStorage and updates the cart badges in the header
     function updateHeaderCart() {
         const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const count = cart.reduce((acc, item) => acc + item.quantity, 0);
-        const badge = document.getElementById('header-cart-count');
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         
-        if (badge) {
-            badge.innerText = count;
-            if (count > 0) {
-                badge.classList.remove('hidden');
-                badge.classList.add('flex');
-            } else {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
-            }
-        }
+        const desktopBadge = document.getElementById('cart-count');
+        const mobileBadge = document.getElementById('mobile-cart-count');
+        
+        if (desktopBadge) desktopBadge.innerText = totalItems;
+        if (mobileBadge) mobileBadge.innerText = totalItems;
     }
-    
+
+    // Run this the second the page loads
     document.addEventListener('DOMContentLoaded', updateHeaderCart);
 </script>
